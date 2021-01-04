@@ -130,22 +130,24 @@ class ContentDetailController extends Controller
 
         $datas = array();
         $structureList = array();
-
+        
         if ($found == 1) {
             $contentList = json_decode($latestContent);
-
+            
             if (count($contentList) > 0) {
                 foreach($contentList as $data) {
+                    
                     $topHead = $data->top_head;
                     $leagueList = $data->datas;
-
+                    
                     $newLeagueList = array();
 
                     if (count($leagueList) > 0) {
                         foreach($leagueList as $league) {
+
                             $lName = $league->league_name;
                             $matchDatas = $league->match_datas;
-
+                            
                             $leftTeamGroup = array();
                             $matchList = array();
 
@@ -177,7 +179,7 @@ class ContentDetailController extends Controller
                                     $matchList[$k]['detail_id'] = $this->detailIdFromLink($match['link'], $dirName);
                                 }
                             }
-
+                            
                             $newLeagueList[] = array(
                                 'league_name' => $lName,
                                 'match_datas' => $matchList
@@ -186,6 +188,7 @@ class ContentDetailController extends Controller
                     }
 
                     $structureList[] = array('top_head' => $topHead, 'datas' => $newLeagueList);
+                    
                 }
             }
 
@@ -221,7 +224,7 @@ class ContentDetailController extends Controller
 
         $domain = request()->getHttpHost();
         $mainDatas = array('raw_group' => $structureList, 'latest_dir' => $dirName, 'domain' => $domain);
-
+        //dd($mainDatas);
         return response()->json($mainDatas);
     }
 
@@ -269,16 +272,18 @@ class ContentDetailController extends Controller
         $latestContent = '';
         $found = 0;
 
-        $latestDir = DirList::select(['dir_name', 'content'])->where('scraping_status', '1')->where('content', '<>', '[]')->orderBy('dir_name', 'desc')->take(1);
+        $latestDir = DirList::select(['dir_name', 'content'])->where('scraping_status', '0')->where('content', '<>', '[]')->orderBy('dir_name', 'desc')->take(1);
+        
         if ($latestDir->count() > 0) {
             $latestDatas = $latestDir->get();
             $found = 0;
-
+            
             foreach($latestDatas as $data) {
+                
                 if ($found == 0) {
                     $dirName = $data->dir_name;
                     $detailDatas = ContentDetail::select('id')->where('dir_name', $dirName)->orderBy('code', 'asc');
-        
+                    
                     if ($detailDatas->count() > 0) {
                         $found = 1;
                         $latestContent = $data->content;

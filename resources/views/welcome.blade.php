@@ -30,7 +30,7 @@
 
                     <h4 class="m-3">Page list</h4>
                     <hr>
-                    <a href="/ราคาบอล">ประตูวาร์ป</a>
+                    <a href="{{ url('ราคาบอล') }}">ประตูวาร์ป</a>
                     <ul>
                         @if(count($routes) > 0)
                             @foreach($routes as $route)

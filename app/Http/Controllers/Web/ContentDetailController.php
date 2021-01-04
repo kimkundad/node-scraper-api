@@ -45,6 +45,7 @@ class ContentDetailController extends Controller
     public function inner(Request $request)
     {
         $link = $request->link;
+        //dd($link);
         $datas = array('link' => $link);
         return view('inner-content', $datas);
     }

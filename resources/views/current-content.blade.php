@@ -16,15 +16,6 @@
             <div class="row">
                 <div class="col-12">
                     <table class="table table-condensed table-striped ffp-current-content">
-                        <thead>
-                            <tr>
-                                <th class="match-time">เวลาแข่ง</th>
-                                <th class="home-team">ทีมเหย้า</th>
-                                <th class="vs">Vs</th>
-                                <th class="away-team">ทีมเยือน</th>
-                                <th class="league-name">ราคาบอลไหล</th>
-                            </tr>
-                        </thead>
                         <tbody id="tbody-ffp">
                             <tr id="tr_loading">
                                 <td colspan="5">
@@ -67,17 +58,18 @@
             };
 
             $.ajax({
-                url: thisHost + '/api/ffp',
+                url: '{{ url('/api/ffp') }}',
                 type: 'POST',
                 data: params,
                 dataType: 'json',
                 cache: false,
                 success: function (response) {
-
+                    //console.log(response.raw_group)
                     if (response.latest_dir) {
                         $('#title_data').html('ข้อมูล ณ เวลา: ' + response.latest_dir);
                         if (response.raw_group) {
                             var domain = response.domain
+                           // console.log(response.raw_group[0]);
                             arrangeContent(response.raw_group, domain);
                         }
                     } else {
@@ -87,7 +79,7 @@
                     }
                 },
                 error: function(response) {
-                    console.log(response);
+                   // console.log(response);
                     $('#title_data').html('The system is currently unavailable.');
                     $('#tr_loading').remove();
                 }
@@ -96,55 +88,159 @@
 
         function arrangeContent(rawGroup, domain) {
             if (rawGroup) {
+                console.log(rawGroup);
                 if (rawGroup.length > 0) {
                     var firstLink = '';
                     var html = '';
-                    for(var i = 0; i < rawGroup.length; i++) {
+                    var c = 0;
+                    c = rawGroup.length;
+                    //console.log(c);
+                    var arr = [];
+                    for(var i = 0; i < c; i++) {
                         var row = rawGroup[i];
-                        var rowDatas = row.match_datas;
-                        var link = row.link;
-                        for (var j = 0; j < rowDatas.length; j++) {
-                            var data = rowDatas[j];
-                            // console.log(data);
+                        var rowDatas = row;
+                        //arr.push(row.datas);
+                       // console.log(row.datas[i].match_datas);
+                       // var link = row.link;
+                        
+                        var d = 0;
+                        var d = row.datas.length;
+
+                       // console.log(row.datas.length);
+                       var f = 0;
+                        for (var j = 0; j < d; j++) {
+                            
+                            var data = row.datas[j];
+                            var link = data.match_datas[0].link;
+                            
+                            if(i == 0){
+
+                           // console.log(data.match_datas.length);
+
+                            if( j == 0){
+                                html += '<tr class="db-collapse">';
+                                html += '<td colspan=5>';
+                                html += '<span><b>' + row.top_head + '</b></span>';
+                                html += '</td>';
+                                html += '</tr>';
+                            }
+
+                            var k = 0;
+                            kk = data.match_datas.length;
+
+                            html += '<tr class="db-collapse">';
+                                html += '<td colspan=5>';
+                                html += '<span><b>' + data.league_name + '</b></span>';
+                                html += '</td>';
+                                html += '</tr>';
+                            
+                            for (var k = 0; k < kk; k++) {
+
+                            var data2 = data.match_datas[k];
+
+
                             html += '<tr class="db-collapse">'; // db-match
                             html +=         '<td>';
                             html +=             '<div class="match-time d-flex just-between">';
-                            html +=                 '<span>' + data.match_result + '</span>';
-                            html +=                 '<span>' + data.date_time_before + '</span>';
+                            html +=                 '<span>' + data2.time + '</span>';
                             html +=             '</div>';
                             html +=         '</td>';
-                            html +=         '<td>' + data.left_team_name + '</td>';
                             html +=         '<td>';
-                            html +=             (data.left_team_score) ? data.left_team_score : '<span class="text-bold">(แพ้/ชนะ)</span>';
-                            html +=         '</td>';
-                            html +=         '<td>';
-                            html +=             (data.left_last_num) ? data.left_last_num : '';
-                            html +=         '</td>';
-                            html +=        '<td>';
-                            html +=             '<div class="vs d-flex just-center">Vs</div>';
-                            html +=         '</td>';
-                            html +=         '<td>' + data.right_team_name + '</td>';
-                            html +=         '<td>';
-                            html +=             (data.right_team_score) ? data.right_team_score : '<span class="text-bold">(แพ้/ชนะ)</span>';
+                            html +=             '<div class="match-time d-flex just-between">';
+                            html +=                 '<span>' + data2.left[0] +' <b>(' + data2.left[1] +')</b></span>';
+                            html +=             '</div>';
                             html +=         '</td>';
                             html +=         '<td>';
-                            html +=             (data.right_last_num) ? data.right_last_num : '';
+                            html +=             'เสมอ <b> ' + data2.mid[1] + '</b>';
                             html +=         '</td>';
-                            if (j == 0) {
-                                html +=         '<td class="row-span" rowspan="' + rowDatas.length + '">';
+                            html +=         '<td>';
+                            html +=             '<div class="match-time d-flex just-between">';
+                            html +=                 '<span>' + data2.right[0] +' <b>(' + data2.right[1] +')</b></span>';
+                            html +=             '</div>';
+                            html +=         '</td>';
+                                html +=         '<td class="row-span" ';
                                 html +=             '<div class="league-name">';
-                                if (data.link) {
-                                    firstLink = (firstLink) ? firstLink : data.link;
-                                    var link = thisHost + '/ราคาบอลไหล?link=' + data.link;
-                                    html +=             '<a href="' + link + '" target="_BLANK">ดูราคา<br>บอลไหล</a>';
+                                if (link) {
+                                    html +=             '<a href="{{ url('/ราคาบอลไหล?link=') }}'+ link +'" target="_BLANK">ดูราคา<br>บอลไหล</a>';
                                 }
                                 html +=             '</div>';
                                 html +=         '</td>';
+                            html += '</tr>';  
                             }
-                            html += '</tr>';
+
+                            }else{
+
+                                var kk = 0;
+                                kk = data.match_datas.length;
+
+                                if(f === 0){
+                                    html += '<tr class="db-collapse">';
+                                    html += '<td colspan=5>';
+                                    html += '<span><b>' + row.top_head + '</b></span>';
+                                    html += '</td>';
+                                    html += '</tr>';
+                                }
+                            
+                            ////////////////////////////////
+
+                                html += '<tr>';
+                                html += '<td colspan=5>';
+                                html += '<span><b>' + data.league_name + '</b></span>';
+                                html += '</td>';
+                                html += '</tr>';
+                          
+                            
+                                for (var k = 0; k < kk; k++) {
+                                var data2 = data.match_datas[k];
+                                
+
+                                console.log(data2.left_list.length);
+                                ll = data2.left_list.length;
+                                //console.log(ll)
+                                for (var l = 0; l < ll; l++) {
+                                    var data3 = data2.left_list[l]; 
+                                    var data4 = data2.right_list[l];  
+
+                                html += '<tr class="db-collapse">'; // db-match
+                                html +=         '<td>';
+                                html +=             '<div class="match-time d-flex just-between">';
+                                html +=                 '<span>' + data2.time + '</span>';
+                                html +=             '</div>';
+                                html +=         '</td>';
+
+                                html +=         '<td>';
+                                html +=             '<div class="match-time d-flex just-between">';
+                                html +=                 '<span>' + data3[0] + ' <span style="padding-left:5px; color: #46a; padding-right:5px;">' + data3[1] + '</span> <b>(' + data3[2] + ')</b></span>';
+                                html +=             '</div>';
+                                html +=         '</td>';
+
+                                html +=         '<td>';
+                                html +=             '<div class="match-time d-flex just-between">';
+                                html +=                 '<span>' + data4[0] + ' <span style="padding-left:5px; color: #46a; padding-right:5px;">' + data4[1] + '</span> <b>(' + data4[2] + ')</b></span>';
+                                html +=             '</div>';
+                                html +=         '</td>';
+
+                                html +=         '<td class="row-span" colspan="2" >';
+                                html +=             '<div class="league-name">';
+                                    if (link) {
+                                    html +=             '<a href="{{ url('/ราคาบอลไหล?link=') }}'+ link +'" target="_BLANK">ดูราคา<br>บอลไหล</a>';
+                                    }
+                                html +=             '</div>';
+                                html +=         '</td>';
+                                html += '</tr>';  
+
+                                }
+
+                                }
+                            
+
+
+
+                            }
+                            f++
                         }
                     }
-
+                    //console.log(arr)
                     $('#tr_loading').remove();
                     $('#tbody-ffp').append(html);
                 }
